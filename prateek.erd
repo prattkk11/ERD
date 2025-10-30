@@ -1,0 +1,85 @@
+// Prateek Verma - ER model derived from RCMODEL (source: university_crowsfoot.erd)
+// Notation: Chen (conceptual / academic style)
+// Business rules (derived from RCMODEL):
+// 1. A Student (student_id) can enroll in zero or more Enrollment records.
+// 2. An Enrollment record identifies the association between one Student and one Course and records grade and semester.
+// 3. A Course (course_id) belongs to exactly one Department and is taught by exactly one Instructor.
+// 4. An Instructor (instructor_id) belongs to exactly one Department and may teach zero or more Courses.
+// 5. A Department (department_id) can have many Courses and many Instructors.
+// 6. Enrollment has its own surrogate key (enrollment_id) in the RCMODEL; it is modeled here as an entity to capture attributes about the enrollment event.
+ 
+erdiagram PrateekVermaModel
+ 
+notation=chen
+ 
+entity Student {
+    student_id: INTEGER key
+    name: VARCHAR(100)
+    email: VARCHAR(100)
+    major: VARCHAR(50)
+    year: INTEGER
+}
+ 
+entity Course {
+    course_id: VARCHAR(10) key
+    title: VARCHAR(200)
+    credits: INTEGER
+    department_id: VARCHAR(10)
+    instructor_id: INTEGER
+}
+ 
+entity Instructor {
+    instructor_id: INTEGER key
+    name: VARCHAR(100)
+    email: VARCHAR(100)
+    department_id: VARCHAR(10)
+}
+ 
+entity Department {
+    department_id: VARCHAR(10) key
+    name: VARCHAR(100)
+    location: VARCHAR(100)
+}
+ 
+// Enrollment is modeled as an entity to capture grade and semester and to follow RCMODEL structure
+entity Enrollment {
+    enrollment_id: INTEGER key
+    student_id: INTEGER
+    course_id: VARCHAR(10)
+    grade: VARCHAR(2)
+    semester: VARCHAR(20)
+}
+ 
+// Relationships
+// A Student may have zero or many Enrollments; each Enrollment must belong to exactly one Student
+relationship StudentEnrollment {
+    Student[1 | "student"] -> Enrollment[0..N | "enrollment"]
+}
+ 
+// Each Enrollment must refer to exactly one Course; a Course may have zero or many Enrollments
+relationship EnrollmentCourse {
+    Enrollment[1 | "enrollment"] -> Course[0..N | "course"]
+}
+ 
+// Each Course is taught by exactly one Instructor; an Instructor may teach zero or many Courses
+relationship CourseInstructor {
+    Course[1 | "course"] -> Instructor[0..N | "instructor"]
+}
+ 
+// Each Course belongs to exactly one Department; a Department may have zero or many Courses
+relationship CourseDepartment {
+    Course[1 | "course"] -> Department[0..N | "department"]
+}
+ 
+// Each Instructor belongs to one Department; Department may have zero or many Instructors
+relationship InstructorDepartment {
+    Instructor[1 | "instructor"] -> Department[0..N | "department"]
+}
+ 
+// Notes and mapping decisions:
+// - Enrollment retains its surrogate PK (enrollment_id) as in RCMODEL. Alternative modeling: treat Enrollment as an associative relationship (Student[N] -> Course[N]) with attributes; here we keep it as an entity to match RCMODEL structure.
+// - Cardinalities set to reflect RCMODEL intent: Students can enroll in many courses; Courses can have many students across Enrollments; each Course has an assigned Instructor and Department (1..1 mapping modeled here). If your rules allow optional instructor assignment for a Course (e.g., course not yet scheduled), change Course->Instructor to Course[0..1] -> Instructor[0..N] or similar.
+// - Attribute datatypes mirror the RCMODEL where present. You can refine types (lengths, constraints) for implementation.
+ 
+// End of model
+ 
